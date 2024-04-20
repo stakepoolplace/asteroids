@@ -24,8 +24,8 @@ sinon téléchargez-le depuis [git-scm.com](https://git-scm.com/downloads).
 ### Cloner le dépôt
 Pour obtenir le projet, utilisez la commande suivante :
 ```bash
-git clone https://github.com/your-username/asteroids-game.git
-cd asteroids-game
+git clone https://github.com/stakepoolplace/asteroids.git
+cd asteroids
 ```
 
 ### Configuration de l'environnement

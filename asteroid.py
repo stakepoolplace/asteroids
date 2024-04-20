@@ -295,7 +295,7 @@ def main():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP or event.key == pygame.K_z:
                     if not thrust_channel.get_busy():
                         thrust_channel.play(thrust_sound)
 
@@ -308,11 +308,11 @@ def main():
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_UP] or keys[pygame.K_z]:
             player.accelerate(1)
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] or keys[pygame.K_q]:
             player.rotate(-1)
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             player.rotate(1)
         if keys[pygame.K_SPACE] and bombs_remaining > 0:
             #if not fire_channel.get_busy():
