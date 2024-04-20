@@ -341,7 +341,7 @@ def main():
 
         if len(asteroids) == 0:
             stage += 1
-            if stage >= 4:
+            if stage >= 5:
                 end_game = True
             else:
                 new_stage = True
