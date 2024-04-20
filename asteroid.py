@@ -29,6 +29,10 @@ FONT = pygame.font.SysFont("Arial", 24)
 # Charger et redimensionner les images
 SHIP_IMAGE = pygame.transform.scale(pygame.image.load("ship.png"), (80, 120))
 BULLET_IMAGE = pygame.transform.scale(pygame.image.load("bullet.png"), (80, 80))
+BACKGROUND_IMAGE = pygame.transform.scale(pygame.image.load("background.jpg"), (WIDTH, HEIGHT))
+
+# Paramètres du défilement du fond
+bg_x = 0
 
 # Vitesse et paramètres des objets
 BULLET_SPEED = 10
@@ -59,11 +63,8 @@ class Explosion:
         self.x, self.y = x - frame_width / 2, y - frame_height / 2
 
     def explode(self):
-        if self.frame_index < len(frames) - 1:
-            self.frame_index += 1
-        else:
-            return True
-        return False
+        self.frame_index += 1
+
 
 class Ship:
     def __init__(self, x, y):
@@ -103,6 +104,18 @@ class Ship:
         self.x %= WIDTH
         self.y %= HEIGHT
         self.rect.center = (self.x, self.y)
+        # Mise à jour pour déplacer le fond d'écran
+        global bg_x
+        bg_x -= self.velocity_x * 0.5  # Vitesse du défilement adaptée à celle du vaisseau
+        # Ralentissement du vaisseau et accélération du défilement du fond
+        global scroll_speed
+        if self.x > WIDTH * 0.85:
+            scroll_speed = 2  # Accélération du défilement du fond
+        else:
+            scroll_speed = 0.5  # Réinitialisation de la vitesse de défilement
+
+        self.x = max(50, min(self.x, WIDTH * 0.95))  # Limite la position x pour ne pas dépasser 95% de la largeur
+
         self.update_graphics()
 
 class Asteroid:
@@ -226,6 +239,14 @@ def main():
         screen.fill(BACKGROUND_COLOR)
 
         player.update()
+        
+    
+        # Défilement du fond
+        bg_x_shift = bg_x - scroll_speed
+        real_bg_x = bg_x_shift % WIDTH
+        screen.blit(BACKGROUND_IMAGE, (real_bg_x - WIDTH, 0))
+        if real_bg_x < WIDTH:
+            screen.blit(BACKGROUND_IMAGE, (real_bg_x, 0))
 
         for asteroid in asteroids:
             asteroid.move()
@@ -257,6 +278,12 @@ def main():
             bullet_rect = bullet_rotated.get_rect(center=(bullet.x, bullet.y))
             screen.blit(bullet_rotated, bullet_rect.topleft)
 
+        for explosion in explosions:
+            explosion.explode()
+            screen.blit(frames[explosion.frame_index], (explosion.x, explosion.y))
+            if explosion.frame_index >= len(frames) - 1:
+                explosions.remove(explosion)
+                    
         for power_up in power_ups:
             power_up.draw(screen, current_time)
             if player.rect.colliderect(power_up.rect):
@@ -264,17 +291,19 @@ def main():
                 power_ups.remove(power_up)
                 bombs_remaining += 100  # Add 100 bombs when a power-up is collected
 
-        for explosion in explosions:
-            if explosion.explode():
-                explosions.remove(explosion)
+                
+
 
         # Display the score and bombs remaining
-        score_text = FONT.render(f"Score: {score}", True, (255, 255, 255))
+        score_text = FONT.render(f"Score: {score}", True, (255, 0, 0))
         bombs_text = FONT.render(f"Bombs: {bombs_remaining}", True, (255, 255, 255))
         screen.blit(score_text, (WIDTH / 2 - score_text.get_width() / 2, HEIGHT - 50))
         screen.blit(bombs_text, (WIDTH / 2 - bombs_text.get_width() / 2, HEIGHT - 25))
 
         screen.blit(player.rotated_image, player.rotated_rect.topleft)
+
+
+
 
         pygame.display.flip()
         clock.tick(60)
