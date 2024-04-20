@@ -47,12 +47,14 @@ Après avoir installé toutes les dépendances, vous pouvez lancer le jeu en ex�
 ```bash
 python asteroid.py
 ```
-touche <Z> : avancer
-touche <Q> ou touche left : pivoter à gauche
-touche <D> ou touche right: pivoter à droite
-<ESPACE> : tirer
-<ECHAP> : sortir du mode plein écran
-<F11> : mode plein écran / sortir du mode plein écran
+
+- **Touche `<Z>`** : avancer
+- **Touche `<Q>`** ou **Touche `<Left>`** : pivoter à gauche
+- **Touche `<D>`** ou **Touche `<Right>`** : pivoter à droite
+- **`<ESPACE>`** : tirer
+- **`<ECHAP>`** : sortir du mode plein écran
+- **`<F11>`** : mode plein écran / sortir du mode plein écran
+
 
 ## Contribuer
 Ce projet est open-source et les contributions sont les bienvenues. Si vous souhaitez contribuer au projet, vous pouvez forker le dépôt, apporter vos modifications et soumettre une pull request.
