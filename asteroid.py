@@ -217,7 +217,7 @@ def display_level_text(screen, text, duration_ms, clock, player):
         clock.tick(60)  # Limiter à 30 FPS
 
     # Pause avant de continuer
-    pygame.time.wait(1000)
+    pygame.time.wait(3000)
 
 def main():
     
@@ -271,7 +271,6 @@ def main():
             BACKGROUND_IMAGE = pygame.transform.scale(pygame.image.load(f"background{stage}.jpg"), (WIDTH, HEIGHT))
 
             ASTEROID_IMAGE = pygame.image.load(f"asteroid{stage}.png")
-            #.image = pygame.transform.scale(, (self.size, self.size))
             asteroids.extend([Asteroid(random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100), random.randint(30, 100)) for _ in range(15)])
             
             display_level_text(screen, f"Stage {stage}", 1000, clock, player)
