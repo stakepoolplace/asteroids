@@ -30,8 +30,7 @@ Après avoir installé toutes les dépendances, vous pouvez lancer le jeu en ex�
 ```bash
 python asteroid.py
 ```
-### Partie 2 du README Markdown :
-```markdown
+
 ## Contribuer
 Ce projet est open-source et les contributions sont les bienvenues. Si vous souhaitez contribuer au projet, vous pouvez forker le dépôt, apporter vos modifications et soumettre une pull request.
 
