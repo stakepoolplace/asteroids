@@ -180,6 +180,7 @@ def main():
     intro_channel = pygame.mixer.find_channel()
     intro_channel.play(intro_sound)
     
+    powerup_channel = pygame.mixer.find_channel()
     fire_channel = pygame.mixer.find_channel()
 
 
@@ -239,6 +240,7 @@ def main():
                     bullets.remove(bullet)
                     asteroids.remove(asteroid)
                     score += 10  # Increment score for each asteroid destroyed
+                    bombs_remaining += 10
                     new_size = random.randint(30, 100)
                     asteroids.append(Asteroid(random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100), new_size))
                     break
@@ -258,10 +260,9 @@ def main():
         for power_up in power_ups:
             power_up.draw(screen, current_time)
             if player.rect.colliderect(power_up.rect):
-                powerup_channel = pygame.mixer.find_channel()
                 powerup_channel.play(powerup_sound)
                 power_ups.remove(power_up)
-                bombs_remaining += 10  # Add 10 bombs when a power-up is collected
+                bombs_remaining += 100  # Add 100 bombs when a power-up is collected
 
         for explosion in explosions:
             if explosion.explode():
