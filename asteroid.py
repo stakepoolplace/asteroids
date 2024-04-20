@@ -18,9 +18,13 @@ HEIGHT -= 60
 # Charger les sons
 explosion_sound = pygame.mixer.Sound("explosion.mp3")
 fire_sound = pygame.mixer.Sound("fire.mp3")
+laser_sound = pygame.mixer.Sound("laser-2.mp3")
 thrust_sound = pygame.mixer.Sound("thrust.wav")
 intro_sound = pygame.mixer.Sound("intro.wav")
 powerup_sound = pygame.mixer.Sound("powerup.wav")
+congratulations_sound = pygame.mixer.Sound("congratulations.mp3")
+win_sound = pygame.mixer.Sound("win.mp3")
+
 
 # Constantes du jeu
 BACKGROUND_COLOR = (0, 0, 0)
@@ -247,8 +251,9 @@ def main():
     
     powerup_channel = pygame.mixer.find_channel()
     fire_channel = pygame.mixer.find_channel()
-
-
+    win_channel = pygame.mixer.find_channel()
+    congratulations_channel = pygame.mixer.find_channel()
+    
     running = True
     while running:
         
@@ -260,6 +265,9 @@ def main():
             bullets = []
             asteroids = []
             
+            if stage > 1:
+                win_channel.play(win_sound)
+
             BACKGROUND_IMAGE = pygame.transform.scale(pygame.image.load(f"background{stage}.jpg"), (WIDTH, HEIGHT))
 
             ASTEROID_IMAGE = pygame.image.load(f"asteroid{stage}.png")
@@ -270,7 +278,8 @@ def main():
 
             new_stage = False
             
-        if end_game:
+        if end_game:            
+            congratulations_channel.play(congratulations_sound)
             display_level_text(screen, "Congratulations You win !", 2000, clock, player)
             end_game = False
             stage = 0
@@ -306,8 +315,12 @@ def main():
         if keys[pygame.K_RIGHT]:
             player.rotate(1)
         if keys[pygame.K_SPACE] and bombs_remaining > 0:
-            if not fire_channel.get_busy():
+            #if not fire_channel.get_busy():
+            if stage == 2:
                 fire_channel.play(fire_sound)
+            else:
+                fire_channel.play(laser_sound)
+
             bullets.append(Bullet(player.x, player.y, player.angle))
             bombs_remaining -= 1  # Decrement the bomb count each time one is fired
 
