@@ -5,6 +5,7 @@
 ## Description
 Le jeu Asteroids est un projet Python qui recrée le célèbre jeu d'arcade dans lequel le joueur commande un vaisseau spatial devant éviter et détruire des astéroïdes tout en naviguant dans l'espace. Ce projet a été développé par Eric Marchand et est entièrement open-source.
 
+![Asteroids Game](demo2.png)
 ## Installation
 Pour jouer à Asteroids, vous devez d'abord configurer votre environnement Python. Le jeu a été testé et développé avec Python 3.x. Suivez les étapes ci-dessous pour installer les dépendances nécessaires.
 
