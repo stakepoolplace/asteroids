@@ -7,10 +7,18 @@ Le jeu Asteroids est un projet Python qui recrée le célèbre jeu d'arcade dans
 
 ![Asteroids Game](demo2.png)
 ## Installation
-Pour jouer à Asteroids, vous devez d'abord configurer votre environnement Python. Le jeu a été testé et développé avec Python 3.x. Suivez les étapes ci-dessous pour installer les dépendances nécessaires.
+Pour jouer à Asteroids, suivez ces instructions détaillées.
 
 ### Prérequis
-Assurez-vous d'avoir Python installé sur votre système. Vous pouvez télécharger Python depuis [python.org](https://www.python.org/downloads/).
+- Assurez-vous d'avoir Python installé sur votre système. Téléchargez-le depuis [python.org](https://www.python.org/downloads/).
+- Git doit être installé pour cloner le dépôt. Téléchargez-le depuis [git-scm.com](https://git-scm.com/downloads).
+
+### Cloner le dépôt
+Pour obtenir le projet, utilisez la commande suivante :
+```bash
+git clone https://github.com/your-username/asteroids-game.git
+cd asteroids-game
+```
 
 ### Configuration de l'environnement
 Il est recommandé d'utiliser un environnement virtuel pour installer les packages requis pour éviter tout conflit avec d'autres projets ou configurations système.
