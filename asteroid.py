@@ -17,13 +17,14 @@ HEIGHT -= 60
 
 # Charger les sons
 explosion_sound = pygame.mixer.Sound("explosion.mp3")
+flame_sound = pygame.mixer.Sound("thrust.mp3")
 fire_sound = pygame.mixer.Sound("fire.mp3")
 laser_sound = pygame.mixer.Sound("laser-2.mp3")
-thrust_sound = pygame.mixer.Sound("thrust.wav")
+rythme_sound = pygame.mixer.Sound("thrust.wav")
 intro_sound = pygame.mixer.Sound("intro.wav")
 powerup_sound = pygame.mixer.Sound("powerup.wav")
-congratulations_sound = pygame.mixer.Sound("congratulations.mp3")
-win_sound = pygame.mixer.Sound("win.mp3")
+congratulations_sound = pygame.mixer.Sound("congratulations.wav")
+win_sound = pygame.mixer.Sound("win.wav")
 
 
 # Constantes du jeu
@@ -69,6 +70,57 @@ class Explosion:
 
     def explode(self):
         self.frame_index += 1
+
+
+sprite_sheet_flame = pygame.image.load('rocket.png')
+
+# Dimensions de chaque frame de flamme
+frame_width_flame = 85.3
+frame_height_flame = 259
+num_cols_flame = 8  # Nombre de colonnes dans le sprite sheet pour les flammes
+num_rows_flame = 1  # Nombre de lignes dans le sprite sheet pour les flammes
+
+# Liste pour stocker chaque frame découpée pour les flammes
+frames_flame = []
+
+# Découper le sprite sheet pour les flammes
+for row in range(num_rows_flame):
+    for col in range(num_cols_flame):
+        frame = sprite_sheet_flame.subsurface(pygame.Rect(col * frame_width_flame, row * frame_height_flame, frame_width_flame, frame_height_flame))
+        frames_flame.append(frame)
+
+ 
+class Flame:
+    def __init__(self):
+        self.flame_index = 0
+        
+    def thrust(self, x, y, angle):
+        rad_angle = math.radians(angle)
+        offset_x = frame_width_flame * 1.2
+        offset_y = 0
+        
+        # Calcul de la position derrière le vaisseau
+        flame_x = x + offset_x * math.cos(rad_angle) - offset_y * math.sin(rad_angle)
+        flame_y = y + offset_x * math.sin(rad_angle) + offset_y * math.cos(rad_angle)
+        
+        # Rotation de l'image de la flamme pour qu'elle suive l'orientation du vaisseau
+        rotated_flame_image = pygame.transform.rotate(frames_flame[self.flame_index], -angle + 90)  # Le "+90" est nécessaire si l'image de base de la flamme est verticale
+
+        # Réduction de taille de 10%
+        current_width = rotated_flame_image.get_width()
+        current_height = rotated_flame_image.get_height()
+        new_width = int(current_width * 0.5)  # 90% de la largeur actuelle
+        new_height = int(current_height * 0.5)  # 90% de la hauteur actuelle
+        scaled_flame_image = pygame.transform.scale(rotated_flame_image, (new_width, new_height))
+
+
+        # Mise à jour de l'index de la frame pour l'animation
+        if self.flame_index >= len(frames_flame) - 1:
+            self.flame_index = 0
+        else:
+            self.flame_index += 1
+
+        return flame_x, flame_y, scaled_flame_image
 
 
 class Ship:
@@ -188,7 +240,7 @@ class PowerUp:
         pygame.draw.circle(surface, self.color, (self.x, self.y), self.size + 5)
         
 # Fonction pour afficher le texte du niveau
-def display_level_text(screen, text, duration_ms, clock, player):
+def display_level_text(screen, text, duration_ms, clock, ship):
     global BACKGROUND_IMAGE
     start_time = pygame.time.get_ticks()
     font_size = 30  # Taille initiale de la police
@@ -199,7 +251,7 @@ def display_level_text(screen, text, duration_ms, clock, player):
     while pygame.time.get_ticks() - start_time < duration_ms:
         screen.fill(background_color)
         screen.blit(BACKGROUND_IMAGE, (0, 0))  # Redessiner le fond à chaque frame
-        screen.blit(player.rotated_image, player.rotated_rect.topleft)
+        screen.blit(ship.rotated_image, ship.rotated_rect.topleft)
 
         font = pygame.font.SysFont("Arial", font_size)
         text_surface = font.render(text, True, color)
@@ -229,11 +281,12 @@ def main():
     clock = pygame.time.Clock()
     fullscreen = True
 
-    player = Ship(WIDTH // 2, HEIGHT // 2)
+    ship = Ship(WIDTH // 2, HEIGHT // 2)
     asteroids = []
     bullets = []
     explosions = []
     power_ups = []
+    flame_index = 0
 
     score, bombs_remaining = 0, 3
     next_powerup_time = 0
@@ -244,7 +297,6 @@ def main():
     end_game = False
     
     # Variables de contrôle
-    thrust_channel = pygame.mixer.find_channel()
 
     intro_channel = pygame.mixer.find_channel()
     intro_channel.play(intro_sound)
@@ -253,15 +305,21 @@ def main():
     fire_channel = pygame.mixer.find_channel()
     win_channel = pygame.mixer.find_channel()
     congratulations_channel = pygame.mixer.find_channel()
+    flame_channel  = pygame.mixer.find_channel()
+    rythmics_channel = pygame.mixer.find_channel()
+
+    # takeoff
+    flame = Flame()
     
     running = True
     while running:
         
+        gas = False
         current_time = pygame.time.get_ticks()
         
         if new_stage:
-            player.image = pygame.transform.scale(pygame.image.load(f"ship{stage}.png"), (250/4, 363/3))
-            player.init()
+            ship.image = pygame.transform.scale(pygame.image.load(f"ship{stage}.png"), (250/4, 363/3))
+            ship.init()
             bullets = []
             asteroids = []
             
@@ -273,13 +331,13 @@ def main():
             ASTEROID_IMAGE = pygame.image.load(f"asteroid{stage}.png")
             asteroids.extend([Asteroid(random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100), random.randint(30, 100)) for _ in range(15)])
             
-            display_level_text(screen, f"Stage {stage}", 1000, clock, player)
+            display_level_text(screen, f"Stage {stage}", 1000, clock, ship)
 
             new_stage = False
             
         if end_game:            
             congratulations_channel.play(congratulations_sound)
-            display_level_text(screen, "Congratulations You win !", 2000, clock, player)
+            display_level_text(screen, "Congratulations !", 2000, clock, ship)
             end_game = False
             stage = 0
         
@@ -295,8 +353,10 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP or event.key == pygame.K_z:
-                    if not thrust_channel.get_busy():
-                        thrust_channel.play(thrust_sound)
+                    #if not flame_channel.get_busy():
+                    flame_channel.play(flame_sound)
+                    if not rythmics_channel.get_busy():
+                        rythmics_channel.play(rythme_sound)
 
 
                 if event.key == pygame.K_F11 or event.key == pygame.K_ESCAPE:
@@ -308,11 +368,12 @@ def main():
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] or keys[pygame.K_z]:
-            player.accelerate(1)
+            ship.accelerate(1)
+            gas = True
         if keys[pygame.K_LEFT] or keys[pygame.K_q]:
-            player.rotate(-1)
+            ship.rotate(-1)
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            player.rotate(1)
+            ship.rotate(1)
         if keys[pygame.K_SPACE] and bombs_remaining > 0:
             #if not fire_channel.get_busy():
             if stage == 2:
@@ -320,20 +381,25 @@ def main():
             else:
                 fire_channel.play(laser_sound)
 
-            bullets.append(Bullet(player.x, player.y, player.angle))
+            bullets.append(Bullet(ship.x, ship.y, ship.angle))
             bombs_remaining -= 1  # Decrement the bomb count each time one is fired
 
         screen.fill(BACKGROUND_COLOR)
 
-        player.update()
+        ship.update()
         
     
-        # Défilement du fond
+        # Défilement du fond, pensez à placer les autres élements graphiques après
         bg_x_shift = bg_x - scroll_speed
         real_bg_x = bg_x_shift % WIDTH
         screen.blit(BACKGROUND_IMAGE, (real_bg_x - WIDTH, 0))
         if real_bg_x < WIDTH:
             screen.blit(BACKGROUND_IMAGE, (real_bg_x, 0))
+
+        if gas:
+            flame_x, flame_y, rotated_flame_image = flame.thrust(ship.x, ship.y, ship.angle - 180)
+            flame_rect = rotated_flame_image.get_rect(center=(flame_x, flame_y))
+            screen.blit(rotated_flame_image, flame_rect)
 
         for asteroid in asteroids:
             asteroid.move()
@@ -375,10 +441,12 @@ def main():
             screen.blit(frames[explosion.frame_index], (explosion.x, explosion.y))
             if explosion.frame_index >= len(frames) - 1:
                 explosions.remove(explosion)
+                
                     
         for power_up in power_ups:
             power_up.draw(screen, current_time)
-            if player.rect.colliderect(power_up.rect):
+            if ship.rect.colliderect(power_up.rect):
+                #if not powerup_channel.get_busy():
                 powerup_channel.play(powerup_sound)
                 power_ups.remove(power_up)
                 bombs_remaining += 100  # Add 100 bombs when a power-up is collected
@@ -394,7 +462,7 @@ def main():
         screen.blit(score_text, (WIDTH / 2 - score_text.get_width() / 2, HEIGHT - 50))
         screen.blit(bombs_text, (WIDTH / 2 - bombs_text.get_width() / 2, HEIGHT - 25))
 
-        screen.blit(player.rotated_image, player.rotated_rect.topleft)
+        screen.blit(ship.rotated_image, ship.rotated_rect.topleft)
 
 
 
