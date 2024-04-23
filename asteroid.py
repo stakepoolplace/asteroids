@@ -16,15 +16,15 @@ WIDTH, HEIGHT = infoObject.current_w, infoObject.current_h  # Résolution compl�
 HEIGHT -= 60
 
 # Charger les sons
-explosion_sound = pygame.mixer.Sound("explosion.mp3")
-flame_sound = pygame.mixer.Sound("thrust.mp3")
-fire_sound = pygame.mixer.Sound("fire.mp3")
-laser_sound = pygame.mixer.Sound("laser-2.mp3")
-rythme_sound = pygame.mixer.Sound("thrust.wav")
-intro_sound = pygame.mixer.Sound("intro.wav")
-powerup_sound = pygame.mixer.Sound("powerup.wav")
-congratulations_sound = pygame.mixer.Sound("congratulations.wav")
-win_sound = pygame.mixer.Sound("win.wav")
+explosion_sound = pygame.mixer.Sound("assets/explosion.mp3")
+flame_sound = pygame.mixer.Sound("assets/thrust.mp3")
+fire_sound = pygame.mixer.Sound("assets/fire.mp3")
+laser_sound = pygame.mixer.Sound("assets/laser-2.mp3")
+rythme_sound = pygame.mixer.Sound("assets/thrust.wav")
+intro_sound = pygame.mixer.Sound("assets/intro.wav")
+powerup_sound = pygame.mixer.Sound("assets/powerup.wav")
+congratulations_sound = pygame.mixer.Sound("assets/congratulations.wav")
+win_sound = pygame.mixer.Sound("assets/win.wav")
 
 
 # Constantes du jeu
@@ -32,11 +32,11 @@ BACKGROUND_COLOR = (0, 0, 0)
 FONT = pygame.font.SysFont("Arial", 24)
 
 # Charger et redimensionner les images
-SHIP_IMAGE = pygame.transform.scale(pygame.image.load("ship1.png"), (62, 151))
-BULLET_IMAGE = pygame.transform.scale(pygame.image.load("bullet.png"), (80, 80))
-BACKGROUND_IMAGE = pygame.transform.scale(pygame.image.load("background1.jpg"), (WIDTH, HEIGHT))
-ASTEROID_IMAGE = pygame.image.load("asteroid1.png")
-ALIEN_IMAGE = pygame.image.load("alien1.png") #pygame.transform.scale(, (690, 257))
+SHIP_IMAGE = pygame.transform.scale(pygame.image.load("assets/ship1.png"), (62, 151))
+BULLET_IMAGE = pygame.transform.scale(pygame.image.load("assets/bullet.png"), (80, 80))
+BACKGROUND_IMAGE = pygame.transform.scale(pygame.image.load("assets/background1.jpg"), (WIDTH, HEIGHT))
+ASTEROID_IMAGE = pygame.image.load("assets/asteroid1.png")
+ALIEN_IMAGE = pygame.image.load("assets/alien1.png") #pygame.transform.scale(, (690, 257))
 
 # Paramètres du défilement du fond
 bg_x = 0
@@ -46,7 +46,7 @@ BULLET_SPEED = 10
 BULLET_LIFETIME = 200
 
 # Charger l'image du sprite sheet
-sprite_sheet = pygame.image.load('explosion.png')
+sprite_sheet = pygame.image.load('assets/explosion.png')
 
 # Dimensions de chaque frame de l'explosion
 frame_width = 192
@@ -73,7 +73,7 @@ class Explosion:
         self.frame_index += 1
 
 
-sprite_sheet_flame = pygame.image.load('rocket.png')
+sprite_sheet_flame = pygame.image.load('assets/rocket.png')
 
 # Dimensions de chaque frame de flamme
 frame_width_flame = 85.3
@@ -122,6 +122,78 @@ class Flame:
             self.flame_index += 1
 
         return flame_x, flame_y, scaled_flame_image
+
+
+sprite_sheet_shield = pygame.image.load('assets/shield.png')
+
+# Dimensions de chaque frame de shield
+frame_width_shield = 161
+frame_height_shield = 157
+num_cols_shield = 5  # Nombre de colonnes dans le sprite sheet pour shield
+num_rows_shield = 4  # Nombre de lignes dans le sprite sheet pour shield
+
+# Liste pour stocker chaque frame découpée pour shield
+frames_shield = []
+
+# Découper le sprite sheet pour les shield
+for row in range(num_rows_shield):
+    for col in range(num_cols_shield):
+        frame = sprite_sheet_shield.subsurface(pygame.Rect(col * frame_width_shield, row * frame_height_shield, frame_width_shield, frame_height_shield))
+        frames_shield.append(frame)
+
+ 
+class Shield:
+    def __init__(self):
+        self.shield_index = 0
+        self.shield_remaining_tick = 0
+        self.active = False
+
+    def activate(self):
+        self.active = True
+        self.shield_remaining_tick = 500
+        
+    def deactivate(self):
+        self.active = False
+        self.shield_remaining_tick = 0
+
+    def is_active(self):
+       return self.active
+   
+    def update(self, x, y, angle):
+        rad_angle = math.radians(angle)
+        offset_x = 40
+        offset_y = 0
+
+        # Calcul de la position sur le vaisseau
+        shield_x = x + offset_x * math.cos(rad_angle) - offset_y * math.sin(rad_angle)
+        shield_y = y + offset_x * math.sin(rad_angle) + offset_y * math.cos(rad_angle)
+        
+        
+        shield_image = frames_shield[self.shield_index]
+        
+        # Rotation de l'image du bouclier pour qu'il suive l'orientation du vaisseau
+        rotated_flame_image = pygame.transform.rotate(shield_image, -angle +90)  # Le "+90" est nécessaire si l'image de base de la flamme est verticale
+
+        
+        # Réduction de taille de 10%
+        # current_width = rotated_flame_image.get_width()
+        # current_height = rotated_flame_image.get_height()
+        # new_width = int(current_width * 1.2)  # 90% de la largeur actuelle
+        # new_height = int(current_height * 1.2)  # 90% de la hauteur actuelle
+        # scaled_shield_image = pygame.transform.scale(rotated_flame_image, (new_width, new_height))
+
+
+        # Mise à jour de l'index de la frame pour l'animation
+        if self.shield_index >= len(frames_shield) - 1:
+            self.shield_index = 0
+        else:
+            self.shield_index += 1
+            
+        self.shield_remaining_tick -= 1
+        if self.shield_remaining_tick <= 0:
+            self.active = False
+
+        return shield_x, shield_y, rotated_flame_image
 
 
 class Ship:
@@ -285,6 +357,7 @@ def main():
 
     
     ship = Ship(WIDTH // 2, HEIGHT // 2)
+    shield = Shield()
     asteroids = []
     bullets = []
     explosions = []
@@ -293,9 +366,8 @@ def main():
     score, bombs_remaining = 0, 3
     next_powerup_time = 0
     last_powerup_time = pygame.time.get_ticks()
-    shield_remaining_tick = 200
     
-    stage = 1
+    stage = 0
     new_stage = True
     win_game = False
     loose_game = False
@@ -323,11 +395,11 @@ def main():
         
         # Gestion des stages
         if new_stage:
-            
+            stage += 1
             font_size = 25  # Taille initiale de la police
-            shield_remaining_tick = 200
-            ship.image = pygame.transform.scale(pygame.image.load(f"ship{stage}.png"), (250/4, 363/3))
+            ship.image = pygame.transform.scale(pygame.image.load(f"assets/ship{stage}.png"), (250/4, 363/3))
             ship.init()
+            shield.activate()
             bullets = []
             asteroids = []
             aliens = []
@@ -335,8 +407,8 @@ def main():
             if stage > 1:
                 win_channel.play(win_sound)
 
-            BACKGROUND_IMAGE = pygame.transform.scale(pygame.image.load(f"background{stage}.jpg"), (WIDTH, HEIGHT))
-            ASTEROID_IMAGE = pygame.image.load(f"asteroid{stage}.png")
+            BACKGROUND_IMAGE = pygame.transform.scale(pygame.image.load(f"assets/background{stage}.jpg"), (WIDTH, HEIGHT))
+            ASTEROID_IMAGE = pygame.image.load(f"assets/asteroid{stage}.png")
             text = f"Stage {stage}"
             show_message_tick = 100
             
@@ -379,19 +451,18 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if not ship.is_alive() and event.key == pygame.K_RETURN:
                     ship.alive = True
-                    shield_remaining_tick = 200
+                    shield.activate()
                     score, bombs_remaining = 0, 3
-                    stage = 1
+                    stage = 0
                     show_message = False
                     new_stage = True
-                    
                 if ship.is_alive() and (event.key == pygame.K_UP or event.key == pygame.K_z):
                     #if not flame_channel.get_busy():
                     flame_channel.play(flame_sound)
                     if not rythmics_channel.get_busy():
                         rythmics_channel.play(rythme_sound)
-
-
+                if ship.is_alive() and event.key == pygame.K_s:
+                    shield.activate()
                 if event.key == pygame.K_F11 or event.key == pygame.K_ESCAPE:
                     fullscreen = not fullscreen
                     if fullscreen:
@@ -429,6 +500,7 @@ def main():
         if real_bg_x < WIDTH:
             screen.blit(BACKGROUND_IMAGE, (real_bg_x, 0))
 
+
         if gas:
             flame_x, flame_y, rotated_flame_image = flame.thrust(ship.x, ship.y, ship.angle - 180)
             flame_rect = rotated_flame_image.get_rect(center=(flame_x, flame_y))
@@ -437,10 +509,26 @@ def main():
         for asteroid in asteroids:
             asteroid.move()
             asteroid.rotate()
+            if ship.is_alive() and not shield.is_active() and pygame.sprite.collide_mask(asteroid, ship): # ship.rect.colliderect(asteroid.rect):
+                explosions.append(Explosion(ship.x, ship.y))
+                ship.destruct()
+                # Vous pouvez ajouter ici la logique pour terminer le jeu ou retirer une vie
+                loose_game = True
+                break  # Sortez de la boucle si vous voulez terminer le jeu immédiatement
+
             
         for alien in aliens:
             alien.move()
-            #asteroid.rotate()
+            if ship.is_alive() and not shield.is_active() and pygame.sprite.collide_mask(alien, ship): # ship.rect.colliderect(alien.rect):
+                explosions.append(Explosion(ship.x, ship.y))
+                ship.destruct()
+                # Vous pouvez ajouter ici la logique pour terminer le jeu ou retirer une vie
+                #display_level_text(screen, "That's one small step for man, one giant leap for alien kind!", 5000, clock, ship)
+                loose_game = True
+                break  # Sortez de la boucle si vous voulez terminer le jeu immédiatement
+
+
+
 
         bullets = [bullet for bullet in bullets if not bullet.move()]
 
@@ -453,6 +541,7 @@ def main():
                     score += 10  # Increment score for each asteroid destroyed
                     bombs_remaining += 10
                     break
+
             for alien in aliens:
                 if pygame.sprite.collide_mask(bullet, alien):
                     explosions.append(Explosion(bullet.rect.left, bullet.rect.top))
@@ -461,31 +550,10 @@ def main():
                     score += 50  # Increment score for each asteroid destroyed
                     bombs_remaining += 50
                     break
-                
-            # Vérification des collisions entre le vaisseau et les astéroïdes/aliens
             
-            if shield_remaining_tick <= 0:
-                for asteroid in asteroids:
-                    if ship.is_alive() and ship.rect.colliderect(asteroid.rect):
-                        explosions.append(Explosion(ship.x, ship.y))
-                        ship.destruct()
-                        # Vous pouvez ajouter ici la logique pour terminer le jeu ou retirer une vie
-                        loose_game = True
-                        break  # Sortez de la boucle si vous voulez terminer le jeu immédiatement
-
-                for alien in aliens:
-                    if ship.is_alive() and ship.rect.colliderect(alien.rect):
-                        explosions.append(Explosion(ship.x, ship.y))
-                        ship.destruct()
-                        # Vous pouvez ajouter ici la logique pour terminer le jeu ou retirer une vie
-                        #display_level_text(screen, "That's one small step for man, one giant leap for alien kind!", 5000, clock, ship)
-                        loose_game = True
-                        break  # Sortez de la boucle si vous voulez terminer le jeu immédiatement
-
 
         if len(asteroids) + len(aliens) == 0:
-            stage += 1
-            if stage >= 5:
+            if stage >= 4:
                 ship.destruct()
                 win_game = True
                 new_stage = False
@@ -549,7 +617,8 @@ def main():
         stage_text = FONT.render(f"Stage: {stage}", True, (255, 0, 0))
         score_text = FONT.render(f"Score: {score}", True, (255, 0, 0))
         bombs_text = FONT.render(f"Bombs: {bombs_remaining}", True, (255, 255, 255))
-        if shield_remaining_tick > 0:
+       
+        if shield.is_active():
             screen.blit(shield_text, (WIDTH / 2 - score_text.get_width() / 2, HEIGHT - 100))
         screen.blit(stage_text, (WIDTH / 2 - score_text.get_width() / 2, HEIGHT - 75))
         screen.blit(score_text, (WIDTH / 2 - score_text.get_width() / 2, HEIGHT - 50))
@@ -558,7 +627,12 @@ def main():
         if ship.is_alive():
             screen.blit(ship.rotated_image, ship.rotated_rect.topleft)
 
-        shield_remaining_tick -=1
+        if shield.is_active():
+            (shield_x, shield_y, rotated_shield_image) = shield.update(ship.x, ship.y, ship.angle)
+            shield_rect = rotated_shield_image.get_rect(center=(shield_x, shield_y))
+            screen.blit(rotated_shield_image, shield_rect)
+
+
 
         pygame.display.flip()
         clock.tick(60)
