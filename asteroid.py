@@ -314,7 +314,7 @@ def main():
 
     # takeoff
     flame = Flame()
-    
+
     running = True
     while running:
         
@@ -324,6 +324,7 @@ def main():
         # Gestion des stages
         if new_stage:
             
+            font_size = 25  # Taille initiale de la police
             shield_remaining_tick = 200
             ship.image = pygame.transform.scale(pygame.image.load(f"ship{stage}.png"), (250/4, 363/3))
             ship.init()
@@ -337,7 +338,6 @@ def main():
             BACKGROUND_IMAGE = pygame.transform.scale(pygame.image.load(f"background{stage}.jpg"), (WIDTH, HEIGHT))
             ASTEROID_IMAGE = pygame.image.load(f"asteroid{stage}.png")
             text = f"Stage {stage}"
-            font_size = 30  # Taille initiale de la police
             show_message_tick = 100
             
             if stage == 1:
@@ -356,13 +356,13 @@ def main():
         if win_game:            
             congratulations_channel.play(congratulations_sound)
             text = "Congratulations ! <ENTER> to restart"
-            font_size = 25  # Taille initiale de la police
+            font_size = 25
             show_message = True
             win_game = False
             
         if loose_game:            
             text = "Game Over. <ENTER> to restart"
-            font_size = 25  # Taille initiale de la police
+            font_size = 25
             show_message = True
             loose_game = False
         
@@ -470,7 +470,6 @@ def main():
                         explosions.append(Explosion(ship.x, ship.y))
                         ship.destruct()
                         # Vous pouvez ajouter ici la logique pour terminer le jeu ou retirer une vie
-                        #display_level_text(screen, "Collision with asteroid!", 5000, clock, ship)
                         loose_game = True
                         break  # Sortez de la boucle si vous voulez terminer le jeu immédiatement
 
