@@ -52,6 +52,7 @@ python asteroid.py
 - **Touche `<Q>`** ou **Touche `<Left>`** : pivoter à gauche
 - **Touche `<D>`** ou **Touche `<Right>`** : pivoter à droite
 - **`<ESPACE>`** : tirer
+- **`<S>`** : bouclier
 - **`<ECHAP>`** : sortir du mode plein écran
 - **`<F11>`** : mode plein écran / sortir du mode plein écran
 

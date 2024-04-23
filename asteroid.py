@@ -174,15 +174,6 @@ class Shield:
         # Rotation de l'image du bouclier pour qu'il suive l'orientation du vaisseau
         rotated_flame_image = pygame.transform.rotate(shield_image, -angle +90)  # Le "+90" est nécessaire si l'image de base de la flamme est verticale
 
-        
-        # Réduction de taille de 10%
-        # current_width = rotated_flame_image.get_width()
-        # current_height = rotated_flame_image.get_height()
-        # new_width = int(current_width * 1.2)  # 90% de la largeur actuelle
-        # new_height = int(current_height * 1.2)  # 90% de la hauteur actuelle
-        # scaled_shield_image = pygame.transform.scale(rotated_flame_image, (new_width, new_height))
-
-
         # Mise à jour de l'index de la frame pour l'animation
         if self.shield_index >= len(frames_shield) - 1:
             self.shield_index = 0
@@ -292,7 +283,6 @@ class Alien:
     def __init__(self, x, y, ratio):
         self.x, self.y = x, y
         self.image = pygame.transform.scale(ALIEN_IMAGE, (690 / ratio, 257 / ratio))
-        #self.image = ALIEN_IMAGE
         self.rect = self.image.get_rect(center=(self.x, self.y))
         self.angle = 0
         self.speed = random.randint(2, 4)
